@@ -1,0 +1,5 @@
+# ignoring executable
+main
+
+# C-program files (not using for the time-being)
+main.c
