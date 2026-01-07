@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import time
 import requests
 from datetime import datetime, timezone as tz, timedelta
+import json
 
 gh_username = input("Enter your GitHub username: ")
 profile_url = f"https://github.com/{gh_username}"
@@ -92,11 +93,17 @@ if timezone_ele:
 
 # metrics I want to return to the end-user
 
-print("\n")
-print(f"user: {gh_username}")
-print(f"public-repositories: {repositories}")
-print(f"stars: {sum_stars}")
-print(f"starred: {sum_starred}")
-print(f"followers: {follower_count}")
-print(f"following: {following_count}")
-print(f"timezone: {timezone}")
+stats = {
+    'user': gh_username,
+    'repositories': repositories,
+    'stars': sum_stars,
+    'starred': sum_starred,
+    'followers': follower_count,
+    'following': following_count,
+    'timezone': timezone
+}
+
+# since most features work properly it's time to output this in a file so I can extract info for CLI 
+
+with open(f'output/{gh_username}_stats.json', 'w') as f:
+    json.dump(stats, f, indent=2)

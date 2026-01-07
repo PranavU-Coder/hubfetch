@@ -3,3 +3,11 @@ main
 
 # C-program files (not using for the time-being)
 main.c
+
+# asset files (this was just for testing)
+/assets
+
+# any output files
+PranavU-Coder_github_stats.txt
+PranavU-Coder_stats.json
+/output
