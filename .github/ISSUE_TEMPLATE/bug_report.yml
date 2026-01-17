@@ -9,7 +9,7 @@ body:
       description: A clear and concise description of the issue.
       placeholder: |
         Describe the issue you encountered and what you expected to happen.
-      Example: "When I executed ghfetch on my terminal: {konsole}, it didn't execute."
+        Example: "When I executed ghfetch on my terminal: {konsole}, it didn't execute."
       render: markdown
     validations:
       required: true
@@ -45,3 +45,4 @@ body:
       description: Any other details or edge cases that might be related.
       placeholder: "This only happens when I execute the command in konsole terminal-emulator."
       render: markdown
+
