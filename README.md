@@ -1,5 +1,8 @@
-a simple setup of taking inputs from user their GitHub username and scrapping the website to return stats associated with their account.
+## ghfetch
 
-a better approach is to have use the GitHub API key, but I will attempt to that once I try the more rigorous approach with aggressive caching and diff comparison.
+A simple GitHub-fetch like tool similar to neofetch, fastfetch, cpufetch etc etc. 
+Uses the official GitHub REST API for getting user-information and GraphQL's API for contribution-stats and uses "rich" for text-formatting. 
 
-chafa is used here to convert images to their 256-color-coded ASCII art for CLI-purposes.
+ascii-image-converter is used here to convert images to their 256-color-coded ASCII art for CLI-purposes.
+
+Plans to rewrite it in C if needed and there exists any performance gains.
