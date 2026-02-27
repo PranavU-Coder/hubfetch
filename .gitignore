@@ -3,3 +3,7 @@
 
 # stat files 
 /output
+
+# config files
+/.venv 
+.python-version
