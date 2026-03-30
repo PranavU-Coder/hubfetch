@@ -6,33 +6,32 @@ from pathlib import Path
 
 CACHE_DIR = Path.home() / ".cache" / "ghfetch"
 META_FILE = CACHE_DIR / "meta.json"
-REFRESH_AFTER = timedelta(hours=6)
+STATS_FILE = CACHE_DIR / "stats.json"
+
+AVATAR_REFRESH = timedelta(hours=6)
+STATS_REFRESH = timedelta(hours=1)
 
 
-def _load_meta() -> dict:
-    """Read cached metadata, returning empty dict if it doesn't exist yet."""
-    if META_FILE.exists():
-        with open(META_FILE, "r") as f:
+def _load_json(path: Path) -> dict:
+    """Read a JSON file, returning an empty dict if it doesn't exist."""
+    if path.exists():
+        with open(path, "r") as f:
             return json.load(f)
     return {}
 
 
-def _save_meta(meta: dict) -> None:
-    """Persist metadata to disk."""
+def _save_json(path: Path, data: dict) -> None:
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    with open(META_FILE, "w") as f:
-        json.dump(meta, f, indent=2)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2)
 
 
-def _download(avatar_url: str, dest: Path) -> bool:
-    """Fetch avatar bytes from URL and write to dest."""
-    try:
-        response = requests.get(avatar_url, timeout=30)
-        response.raise_for_status()
-        dest.write_bytes(response.content)
+def _is_stale(timestamp_iso: str | None, max_age: timedelta) -> bool:
+    """Return True if the timestamp is missing or older than max_age."""
+    if not timestamp_iso:
         return True
-    except Exception:
-        return False
+    last = datetime.fromisoformat(timestamp_iso)
+    return datetime.now(timezone.utc) - last > max_age
 
 
 def avatar_path(username: str) -> Path:
@@ -42,38 +41,66 @@ def avatar_path(username: str) -> Path:
 
 def ensure_avatar(username: str, current_avatar_url: str) -> Path | None:
     """
-    Return a valid local path to the user's avatar, downloading or refreshing
-    it as needed.
+    Return a valid local path to the user's avatar, downloading or
+    refreshing it as needed every 6 hours.
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     dest = avatar_path(username)
-    meta = _load_meta()
-    now = datetime.now(timezone.utc)
+    meta = _load_json(META_FILE)
+    now = datetime.now(timezone.utc).isoformat()
 
-    last_checked_raw = meta.get("last_checked")
     cached_url = meta.get("avatar_url")
+    last_checked_raw = meta.get("avatar_last_checked")
 
     # first run
     if not dest.exists() or not last_checked_raw:
-        if _download(current_avatar_url, dest):
-            _save_meta(
-                {"avatar_url": current_avatar_url, "last_checked": now.isoformat()}
-            )
+        if _download_avatar(current_avatar_url, dest):
+            meta.update({"avatar_url": current_avatar_url, "avatar_last_checked": now})
+            _save_json(META_FILE, meta)
             return dest
         return None
 
-    last_checked = datetime.fromisoformat(last_checked_raw)
-
-    # Within 6 hours — serve from cache
-    if now - last_checked < REFRESH_AFTER:
+    # Within 6 hours, serve from disk
+    if not _is_stale(last_checked_raw, AVATAR_REFRESH):
         return dest
 
-    # Past 6 hours — check if avatar URL changed
+    # Past 6 hours, re-download only if URL changed
     if current_avatar_url != cached_url:
-        # URL changed → user updated their avatar, re-download
-        _download(current_avatar_url, dest)
+        _download_avatar(current_avatar_url, dest)
 
-    # Either way, update the timestamp and stored URL
-    _save_meta({"avatar_url": current_avatar_url, "last_checked": now.isoformat()})
+    meta.update({"avatar_url": current_avatar_url, "avatar_last_checked": now})
+    _save_json(META_FILE, meta)
     return dest
+
+
+def _download_avatar(url: str, dest: Path) -> bool:
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        dest.write_bytes(response.content)
+        return True
+    except Exception:
+        return False
+
+
+def get_cached_stats() -> dict | None:
+    """
+    Return cached stats if they're less than 1 hour old, otherwise None.
+    Returning None tells the caller to re-fetch from the API.
+    """
+    data = _load_json(STATS_FILE)
+    if not data:
+        return None
+
+    if _is_stale(data.get("_cached_at"), STATS_REFRESH):
+        return None
+
+    # strip internal metadata before returning to caller
+    return {k: v for k, v in data.items() if not k.startswith("_")}
+
+
+def save_stats(stats: dict) -> None:
+    """Persist stats to disk with a timestamp."""
+    payload = {**stats, "_cached_at": datetime.now(timezone.utc).isoformat()}
+    _save_json(STATS_FILE, payload)

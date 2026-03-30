@@ -1,6 +1,7 @@
 import re
 import requests
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 
 class GitHubClient:
@@ -99,13 +100,19 @@ class GitHubClient:
             return 0
 
     def fetch_stats(self, year: int = 2026) -> dict:
-        from ghfetch.cache import ensure_avatar
+        from ghfetch.cache import ensure_avatar, get_cached_stats, save_stats
 
+        # serve from cache if less than 1 hour old
+        cached = get_cached_stats()
+        if cached:
+            ensure_avatar(cached["user"], "")
+            return cached
+
+        # if cache miss
         user = self.get_user()
         username = user["login"]
         avatar_url = user.get("avatar_url", "")
 
-        # all independent
         with ThreadPoolExecutor(max_workers=4) as pool:
             future_repos = pool.submit(self.get_repos, username)
             future_starred = pool.submit(self.get_starred_count, username)
@@ -115,12 +122,12 @@ class GitHubClient:
             repos = future_repos.result()
             starred = future_starred.result()
             contributions = future_contribs.result()
-            future_avatar.result()  # wait for avatar download to finish
+            future_avatar.result()
 
         sum_stars = sum(r.get("stargazers_count", 0) for r in repos)
         fork_count = sum(1 for r in repos if r.get("fork", False))
 
-        return {
+        stats = {
             "user": username,
             "bio": user.get("bio") or "No bio available",
             "repositories": user.get("public_repos", 0),
@@ -131,3 +138,6 @@ class GitHubClient:
             "following": user.get("following", 0),
             "contributions": contributions,
         }
+
+        save_stats(stats)
+        return stats
