@@ -1,17 +1,28 @@
 [project]
 name = "ghfetch"
-version = "0.1.0"
+version = "1.0.0"
 description = "A CLI ricing tool designed to fetch GitHub user stats"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "certifi>=2026.2.25",
-    "charset-normalizer>=3.4.4",
-    "idna>=3.11",
-    "markdown-it-py>=4.0.0",
-    "mdurl>=0.1.2",
-    "pygments>=2.19.2",
+    "click>=8.3.1",
+    "pillow>=12.1.1",
     "requests>=2.32.5",
     "rich>=14.3.3",
-    "urllib3>=2.6.3",
 ]
+
+[project.scripts]
+ghfetch = "ghfetch.cli:cli"
+
+[dependency-groups]
+dev = [
+    "hatchling>=1.29.0",
+    "ruff>=0.15.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true

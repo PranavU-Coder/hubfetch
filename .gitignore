@@ -1,9 +1,7 @@
-# asset files
-/assets
-
-# stat files 
-/output
-
 # config files
 /.venv 
 .python-version
+
+# fucking cache
+/.ruff_cache
+/__pycache__/
