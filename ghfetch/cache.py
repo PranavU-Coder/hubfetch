@@ -13,10 +13,13 @@ STATS_REFRESH = timedelta(hours=1)
 
 
 def _load_json(path: Path) -> dict:
-    """Read a JSON file, returning an empty dict if it doesn't exist."""
+    """Read a JSON file, returning an empty dict if it doesn't exist or is corrupt."""
     if path.exists():
-        with open(path, "r") as f:
-            return json.load(f)
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError, OSError:
+            return {}
     return {}
 
 
@@ -71,6 +74,10 @@ def ensure_avatar(username: str, current_avatar_url: str) -> Path | None:
 
     meta.update({"avatar_url": current_avatar_url, "avatar_last_checked": now})
     _save_json(META_FILE, meta)
+
+    if not dest.exists():
+        return None
+
     return dest
 
 

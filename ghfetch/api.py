@@ -72,35 +72,64 @@ class GitHubClient:
         data, _ = self._get_with_headers(f"/users/{username}/starred", per_page=100)
         return len(data)
 
-    def get_contributions(self, username: str, year: int) -> int:
+    def get_contributions(self, username: str, year: int) -> dict:
+        from_date = f"{year}-01-01T00:00:00Z"
+        to_date = f"{year}-12-31T23:59:59Z"
+
         query = """
-        query($username: String!, $from: DateTime!, $to: DateTime!) {
-          user(login: $username) {
-            contributionsCollection(from: $from, to: $to) {
-              contributionCalendar {
-                totalContributions
-              }
+        query($login: String!, $from: DateTime!, $to: DateTime!) {
+            user(login: $login) {
+                contributionsCollection(from: $from, to: $to) {
+                    totalCommitContributions
+                    totalIssueContributions
+                    totalPullRequestContributions
+                    contributionCalendar {
+                        totalContributions
+                        weeks {
+                            contributionDays {
+                                date
+                                contributionCount
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
         """
+        variables = {"login": username, "from": from_date, "to": to_date}
+        data = self._graphql(query, variables)
+        collection = data["data"]["user"]["contributionsCollection"]
+        calendar = collection["contributionCalendar"]
 
-        variables = {
-            "username": username,
-            "from": f"{year}-01-01T00:00:00Z",
-            "to": f"{year}-12-31T23:59:59Z",
+        days = [
+            day
+            for week in calendar.get("weeks", [])
+            for day in week.get("contributionDays", [])
+        ]
+        best = max(
+            days,
+            key=lambda d: d["contributionCount"],
+            default={"date": "None", "contributionCount": 0},
+        )
+        best_date = best["date"]
+        best_count = best["contributionCount"]
+
+        return {
+            "total": calendar.get("totalContributions", 0),
+            "commits": collection.get("totalCommitContributions", 0),
+            "issues": collection.get("totalIssueContributions", 0),
+            "prs": collection.get("totalPullRequestContributions", 0),
+            "best_day_date": best_date,
+            "best_day_count": best_count,
         }
 
-        try:
-            data = self._graphql(query, variables)
-            return data["data"]["user"]["contributionsCollection"][
-                "contributionCalendar"
-            ]["totalContributions"]
-        except Exception:
-            return 0
-
-    def fetch_stats(self, year: int = 2026) -> dict:
+    def fetch_stats(self, year: int = None) -> dict:
+        # yet another masterpiece of local import implemented by sir Pranav Unni, what can I even say at this point?
+        import datetime
         from ghfetch.cache import ensure_avatar, get_cached_stats, save_stats
+
+        if year is None:
+            year = datetime.datetime.now().year
 
         # serve from cache if less than 1 hour old
         cached = get_cached_stats()
@@ -108,7 +137,7 @@ class GitHubClient:
             ensure_avatar(cached["user"], "")
             return cached
 
-        # if cache miss
+        # cache miss => fetch everything in parallel
         user = self.get_user()
         username = user["login"]
         avatar_url = user.get("avatar_url", "")
@@ -121,11 +150,19 @@ class GitHubClient:
 
             repos = future_repos.result()
             starred = future_starred.result()
-            contributions = future_contribs.result()
+            contribs = future_contribs.result()
             future_avatar.result()
 
         sum_stars = sum(r.get("stargazers_count", 0) for r in repos)
         fork_count = sum(1 for r in repos if r.get("fork", False))
+
+        languages = {}
+        for r in repos:
+            lang = r.get("language")
+            if lang:
+                languages[lang] = languages.get(lang, 0) + 1
+
+        top_language = max(languages, key=languages.get) if languages else "None"
 
         stats = {
             "user": username,
@@ -136,7 +173,11 @@ class GitHubClient:
             "starred": starred,
             "followers": user.get("followers", 0),
             "following": user.get("following", 0),
-            "contributions": contributions,
+            "commits": contribs.get("commits", 0),
+            "issues": contribs.get("issues", 0),
+            "prs": contribs.get("prs", 0),
+            "best_day": f"{contribs.get('best_day_count')} contributions",
+            "top_language": top_language,
         }
 
         save_stats(stats)

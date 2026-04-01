@@ -8,7 +8,7 @@ from ghfetch.display import render
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="0.1.0")
+@click.version_option(version="1.0.0")
 def cli(ctx):
     """neofetch-style CLI for your GitHub profile."""
 
@@ -17,7 +17,7 @@ def cli(ctx):
         return
 
     if not config.has_credentials():
-        click.echo("No credentials found!")
+        click.echo("No credentials found")
         click.echo("Run 'ghfetch auth' to set up your GitHub token.")
         sys.exit(1)
 
