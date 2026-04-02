@@ -7,7 +7,7 @@ from hubfetch import config
 
 # terminals known to support the kitty graphics protocol
 _KITTY_TERMS = {
-    "TERM":         {"xterm-kitty"},
+    "TERM": {"xterm-kitty"},
     "TERM_PROGRAM": {"ghostty", "WezTerm", "Konsole"},
 }
 
@@ -20,7 +20,7 @@ def verify_token(token: str) -> str | None:
     response = requests.get(
         "https://api.github.com/user",
         headers={
-            "Accept":        "application/vnd.github+json",
+            "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
         },
     )
@@ -34,7 +34,7 @@ def _detect_renderer() -> tuple[str, str]:
     Detect whether the current terminal supports the kitty graphics protocol.
     Returns (renderer_name, reason_string).
     """
-    term     = os.environ.get("TERM", "")
+    term = os.environ.get("TERM", "")
     term_pgm = os.environ.get("TERM_PROGRAM", "")
 
     if term in _KITTY_TERMS["TERM"]:

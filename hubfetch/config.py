@@ -6,15 +6,15 @@ from pathlib import Path
 
 CONFIG_DIR = Path.home() / ".config" / "hubfetch"
 CONFIG_FILE = CONFIG_DIR / "config.json"
-ENV_TOKEN    = "HUBFETCH_TOKEN"
+ENV_TOKEN = "HUBFETCH_TOKEN"
 ENV_USERNAME = "HUBFETCH_USERNAME"
 
 _DEFAULTS = {
-    "token":    "",
+    "token": "",
     "username": "",
     "display": {
         "image_renderer": "auto",
-        "image_size":     40,
+        "image_size": 40,
     },
 }
 
@@ -42,7 +42,7 @@ def _read() -> dict:
     try:
         with open(CONFIG_FILE, "r") as f:
             return json.load(f)
-    except (OSError, json.JSONDecodeError):
+    except OSError, json.JSONDecodeError:
         _write(_DEFAULTS.copy())
         return _DEFAULTS.copy()
 
@@ -60,7 +60,7 @@ def get_config() -> dict:
     Env vars override token and username.
     """
     init_config()
-    data   = _read()
+    data = _read()
     merged = _deep_merge(_DEFAULTS, data)
 
     if token := os.environ.get(ENV_TOKEN):
@@ -82,7 +82,7 @@ def set_credentials(token: str, username: str) -> bool:
     try:
         init_config()
         data = _read()
-        data["token"]    = token
+        data["token"] = token
         data["username"] = username
         _write(data)
         return True

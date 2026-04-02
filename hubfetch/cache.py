@@ -5,11 +5,11 @@ from pathlib import Path
 
 
 CACHE_DIR = Path.home() / ".cache" / "hubfetch"
-META_FILE  = CACHE_DIR / "meta.json"
+META_FILE = CACHE_DIR / "meta.json"
 STATS_FILE = CACHE_DIR / "stats.json"
 
 AVATAR_REFRESH = timedelta(hours=6)
-STATS_REFRESH  = timedelta(hours=1)
+STATS_REFRESH = timedelta(hours=1)
 
 
 def _load_json(path: Path) -> dict:
@@ -18,7 +18,7 @@ def _load_json(path: Path) -> dict:
         try:
             with open(path, "r") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, OSError):
+        except json.JSONDecodeError, OSError:
             return {}
     return {}
 
@@ -49,10 +49,10 @@ def ensure_avatar(username: str, current_avatar_url: str) -> Path | None:
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    dest             = avatar_path(username)
-    meta             = _load_json(META_FILE)
-    now              = datetime.now(timezone.utc).isoformat()
-    cached_url       = meta.get("avatar_url")
+    dest = avatar_path(username)
+    meta = _load_json(META_FILE)
+    now = datetime.now(timezone.utc).isoformat()
+    cached_url = meta.get("avatar_url")
     last_checked_raw = meta.get("avatar_last_checked")
 
     # first run

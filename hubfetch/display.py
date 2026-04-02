@@ -17,8 +17,8 @@ class ImageRenderer:
     """Handles terminal image rendering."""
 
     def __init__(self, size: int = 40, renderer: str = "auto"):
-        self.width    = size
-        self.height   = size // 2
+        self.width = size
+        self.height = size // 2
         self.renderer = renderer
 
     def render_kitty_direct(self, image_path: str) -> bool:
@@ -26,8 +26,10 @@ class ImageRenderer:
             result = subprocess.run(
                 [
                     "chafa",
-                    "--format", "kitty",
-                    "--size",   f"{self.width}x{self.height}",
+                    "--format",
+                    "kitty",
+                    "--size",
+                    f"{self.width}x{self.height}",
                     image_path,
                 ],
                 stdin=subprocess.DEVNULL,
@@ -55,10 +57,14 @@ class ImageRenderer:
             result = subprocess.run(
                 [
                     "chafa",
-                    "--format", "symbols",
-                    "--colors", "full",
-                    "--size",   f"{self.width}x{self.height}",
-                    "--dither", "ordered",
+                    "--format",
+                    "symbols",
+                    "--colors",
+                    "full",
+                    "--size",
+                    f"{self.width}x{self.height}",
+                    "--dither",
+                    "ordered",
                     image_path,
                 ],
                 capture_output=True,
@@ -121,14 +127,25 @@ def _iter_fields(data: dict, cfg: dict):
     Yields (label, value, color) for every enabled field, in display order.
     """
     display_cfg = cfg.get("display", {})
-    
-    show = display_cfg.get("show", {
-        "bio": True, "repositories": True, "forks": True,
-        "stars": True, "starred": True, "followers": True,
-        "following": True, "commits": True, "issues": True,
-        "prs": True, "best_day": True, "top_language": True
-    })
-    
+
+    show = display_cfg.get(
+        "show",
+        {
+            "bio": True,
+            "repositories": True,
+            "forks": True,
+            "stars": True,
+            "starred": True,
+            "followers": True,
+            "following": True,
+            "commits": True,
+            "issues": True,
+            "prs": True,
+            "best_day": True,
+            "top_language": True,
+        },
+    )
+
     default_colors = {
         "user": "bold cyan",
         "bio": "italic",
@@ -142,11 +159,14 @@ def _iter_fields(data: dict, cfg: dict):
         "issues": "bold yellow",
         "prs": "bold magenta",
         "best_day": "bold red",
-        "top_language": "bold blue"
+        "top_language": "bold blue",
     }
-    
+
     cfg_colors = display_cfg.get("colors", {})
-    colors = {k: cfg_colors.get(k, default_colors.get(k, "bold white")) for k in default_colors}
+    colors = {
+        k: cfg_colors.get(k, default_colors.get(k, "bold white"))
+        for k in default_colors
+    }
 
     # user is always shown
     yield "User:", data["user"], colors["user"]
@@ -181,6 +201,7 @@ def _iter_fields(data: dict, cfg: dict):
 
 def _build_info_lines(data: dict, cfg: dict) -> list[str]:
     """Plain ANSI strings for kitty cursor-positioned layout."""
+
     def row(label: str, value: str, color: str) -> str:
         ansi = _rich_color_to_ansi(color)
         return f"\033[1m{label:<16}\033[0m \033[{ansi}m{value}\033[0m"

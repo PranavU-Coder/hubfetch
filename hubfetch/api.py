@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 class GitHubClient:
     """GitHub API client — wraps REST v3 and GraphQL v4 endpoints."""
 
-    BASE_URL    = "https://api.github.com"
+    BASE_URL = "https://api.github.com"
     GRAPHQL_URL = "https://api.github.com/graphql"
 
     def __init__(self, token: str) -> None:
@@ -14,7 +14,7 @@ class GitHubClient:
         self._session = requests.Session()
         self._session.headers.update(
             {
-                "Accept":        "application/vnd.github+json",
+                "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {token}",
             }
         )
@@ -42,7 +42,7 @@ class GitHubClient:
 
     def get_repos(self, username: str) -> list[dict]:
         repos = []
-        page  = 1
+        page = 1
         while True:
             page_data = self._get(
                 f"/users/{username}/repos",
@@ -88,27 +88,31 @@ class GitHubClient:
             }
         }
         """
-        variables  = {
+        variables = {
             "login": username,
-            "from":  f"{year}-01-01T00:00:00Z",
-            "to":    f"{year}-12-31T23:59:59Z",
+            "from": f"{year}-01-01T00:00:00Z",
+            "to": f"{year}-12-31T23:59:59Z",
         }
-        data       = self._graphql(query, variables)
+        data = self._graphql(query, variables)
         collection = data["data"]["user"]["contributionsCollection"]
-        calendar   = collection["contributionCalendar"]
+        calendar = collection["contributionCalendar"]
 
         days = [
             day
             for week in calendar.get("weeks", [])
-            for day  in week.get("contributionDays", [])
+            for day in week.get("contributionDays", [])
         ]
-        best       = max(days, key=lambda d: d["contributionCount"], default={"date": "None", "contributionCount": 0})
+        best = max(
+            days,
+            key=lambda d: d["contributionCount"],
+            default={"date": "None", "contributionCount": 0},
+        )
         best_count = best["contributionCount"]
 
         return {
-            "commits":  collection.get("totalCommitContributions", 0),
-            "issues":   collection.get("totalIssueContributions", 0),
-            "prs":      collection.get("totalPullRequestContributions", 0),
+            "commits": collection.get("totalCommitContributions", 0),
+            "issues": collection.get("totalIssueContributions", 0),
+            "prs": collection.get("totalPullRequestContributions", 0),
             "best_day": f"{best_count}",
         }
 
@@ -120,22 +124,22 @@ class GitHubClient:
             ensure_avatar(cached["user"], "")
             return cached
 
-        user       = self.get_user()
-        username   = user["login"]
+        user = self.get_user()
+        username = user["login"]
         avatar_url = user.get("avatar_url", "")
 
         with ThreadPoolExecutor(max_workers=4) as pool:
-            future_repos    = pool.submit(self.get_repos, username)
-            future_starred  = pool.submit(self.get_starred_count, username)
+            future_repos = pool.submit(self.get_repos, username)
+            future_starred = pool.submit(self.get_starred_count, username)
             future_contribs = pool.submit(self.get_contributions, username, year)
-            future_avatar   = pool.submit(ensure_avatar, username, avatar_url)
+            future_avatar = pool.submit(ensure_avatar, username, avatar_url)
 
-            repos    = future_repos.result()
-            starred  = future_starred.result()
+            repos = future_repos.result()
+            starred = future_starred.result()
             contribs = future_contribs.result()
             future_avatar.result()
 
-        sum_stars  = sum(r.get("stargazers_count", 0) for r in repos)
+        sum_stars = sum(r.get("stargazers_count", 0) for r in repos)
         fork_count = sum(1 for r in repos if r.get("fork", False))
 
         languages = {}
@@ -146,18 +150,18 @@ class GitHubClient:
         top_language = max(languages, key=languages.get) if languages else "None"
 
         stats = {
-            "user":         username,
-            "bio":          user.get("bio") or "No bio available",
+            "user": username,
+            "bio": user.get("bio") or "No bio available",
             "repositories": user.get("public_repos", 0),
-            "forks":        fork_count,
-            "stars":        sum_stars,
-            "starred":      starred,
-            "followers":    user.get("followers", 0),
-            "following":    user.get("following", 0),
-            "commits":      contribs.get("commits", 0),
-            "issues":       contribs.get("issues", 0),
-            "prs":          contribs.get("prs", 0),
-            "best_day":     contribs.get("best_day"),
+            "forks": fork_count,
+            "stars": sum_stars,
+            "starred": starred,
+            "followers": user.get("followers", 0),
+            "following": user.get("following", 0),
+            "commits": contribs.get("commits", 0),
+            "issues": contribs.get("issues", 0),
+            "prs": contribs.get("prs", 0),
+            "best_day": contribs.get("best_day"),
             "top_language": top_language,
         }
 

@@ -22,8 +22,8 @@ def cli(ctx):
         sys.exit(1)
 
     credentials = config.get_credentials()
-    client      = GitHubClient(credentials["token"])
-    stats       = client.fetch_stats()
+    client = GitHubClient(credentials["token"])
+    stats = client.fetch_stats()
     render(stats)
 
 
