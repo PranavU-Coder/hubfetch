@@ -1,18 +1,17 @@
 [project]
-name = "ghfetch"
+name = "hubfetch"
 version = "1.0.0"
 description = "A CLI ricing tool designed to fetch GitHub user stats"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "click>=8.3.1",
-    "pillow>=12.1.1",
     "requests>=2.32.5",
     "rich>=14.3.3",
 ]
 
 [project.scripts]
-ghfetch = "ghfetch.cli:cli"
+hubfetch = "hubfetch.cli:cli"
 
 [dependency-groups]
 dev = [

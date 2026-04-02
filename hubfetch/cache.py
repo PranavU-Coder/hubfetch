@@ -4,19 +4,22 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
-CACHE_DIR = Path.home() / ".cache" / "ghfetch"
-META_FILE = CACHE_DIR / "meta.json"
+CACHE_DIR = Path.home() / ".cache" / "hubfetch"
+META_FILE  = CACHE_DIR / "meta.json"
 STATS_FILE = CACHE_DIR / "stats.json"
 
 AVATAR_REFRESH = timedelta(hours=6)
-STATS_REFRESH = timedelta(hours=1)
+STATS_REFRESH  = timedelta(hours=1)
 
 
 def _load_json(path: Path) -> dict:
-    """Read a JSON file, returning an empty dict if it doesn't exist."""
+    """Read a JSON file, returning an empty dict if it doesn't exist or is corrupt."""
     if path.exists():
-        with open(path, "r") as f:
-            return json.load(f)
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return {}
     return {}
 
 
@@ -46,11 +49,10 @@ def ensure_avatar(username: str, current_avatar_url: str) -> Path | None:
     """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    dest = avatar_path(username)
-    meta = _load_json(META_FILE)
-    now = datetime.now(timezone.utc).isoformat()
-
-    cached_url = meta.get("avatar_url")
+    dest             = avatar_path(username)
+    meta             = _load_json(META_FILE)
+    now              = datetime.now(timezone.utc).isoformat()
+    cached_url       = meta.get("avatar_url")
     last_checked_raw = meta.get("avatar_last_checked")
 
     # first run
@@ -61,16 +63,20 @@ def ensure_avatar(username: str, current_avatar_url: str) -> Path | None:
             return dest
         return None
 
-    # Within 6 hours, serve from disk
+    # within 6 hours, serve from disk
     if not _is_stale(last_checked_raw, AVATAR_REFRESH):
         return dest
 
-    # Past 6 hours, re-download only if URL changed
+    # past 6 hours, re-download only if URL changed
     if current_avatar_url != cached_url:
         _download_avatar(current_avatar_url, dest)
 
     meta.update({"avatar_url": current_avatar_url, "avatar_last_checked": now})
     _save_json(META_FILE, meta)
+
+    if not dest.exists():
+        return None
+
     return dest
 
 
@@ -87,16 +93,12 @@ def _download_avatar(url: str, dest: Path) -> bool:
 def get_cached_stats() -> dict | None:
     """
     Return cached stats if they're less than 1 hour old, otherwise None.
-    Returning None tells the caller to re-fetch from the API.
     """
     data = _load_json(STATS_FILE)
     if not data:
         return None
-
     if _is_stale(data.get("_cached_at"), STATS_REFRESH):
         return None
-
-    # strip internal metadata before returning to caller
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 
