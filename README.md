@@ -28,6 +28,8 @@ Don't worry if your favorite terminal doesn't support kitty's graphics protocol 
 ![Alt](./assets/preview-2.png)
 ![Alt](./assets/config.png)
 
+https://github.com/user-attachments/assets/9d06be44-fa36-4e24-bdee-a29838a801c3
+
 </details>
 
 ## Features
