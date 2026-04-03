@@ -1,10 +1,11 @@
 import sys
 import click
+import requests
+from importlib.metadata import version
 from hubfetch import config
-from hubfetch.auth import auth
+from hubfetch.auth import auth, _detect_renderer, _ensure_chafa
 from hubfetch.api import GitHubClient
 from hubfetch.display import render
-from importlib.metadata import version
 
 
 @click.group(invoke_without_command=True)
@@ -22,9 +23,23 @@ def cli(ctx):
         click.echo("Run 'hubfetch auth' to set up your GitHub token.")
         sys.exit(1)
 
+    # ensure chafa is available before rendering if not on a kitty terminal
+    renderer, _ = _detect_renderer()
+    if renderer == "chafa":
+        _ensure_chafa()
+
     credentials = config.get_credentials()
     client = GitHubClient(credentials["token"])
-    stats = client.fetch_stats()
+
+    try:
+        stats = client.fetch_stats()
+    except RuntimeError as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+    except requests.HTTPError as e:
+        click.echo(f"GitHub API error: {e}", err=True)
+        sys.exit(1)
+
     render(stats)
 
 

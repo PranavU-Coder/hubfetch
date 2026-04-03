@@ -1,3 +1,3 @@
 from hubfetch import config
 
-__all__ = ["config", "GitHubClient", "render"]
+__all__ = ["config"]

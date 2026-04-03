@@ -65,7 +65,6 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
         managers = [
             ("winget", ["winget", "install", "hpjansson.Chafa"]),
             ("scoop", ["scoop", "install", "chafa"]),
-            ("choco", ["choco", "install", "chafa", "-y"]),
         ]
     elif system == "Darwin":
         managers = [
