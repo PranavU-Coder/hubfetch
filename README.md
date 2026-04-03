@@ -4,9 +4,9 @@
 
 ## Description
 
-A [not very minimal] fetching tool for your GitHub profile. Flex at your friends from terminal itself without even opening a new tab.
+A [not very minimal] fetching tool for your GitHub profile. Flex on your friends from terminal itself without even opening a new tab.
 
-This entire script is written purely in python and uses GitHub's REST API for acquiring details of your profile, you can opt out of certain fields and even change the image rendered in accordance to your needs by editing at ~/.config/hubfetch.json
+This entire script is written purely in python and uses GitHub's REST API for acquiring details of your profile, you can opt out of certain fields and even change the image rendered in accordance to your needs by editing at ~/.config/hubfetch/config.json
 
 The image rendered depends heavily on the terminal as it requires kitty's graphics protocol and full image rendering is supported in those terminals which are capable enough of supporting it.
 
@@ -53,7 +53,78 @@ While the script does attempt to install in case terminal emulator appears to no
 
 ## Installation
 
-[WIP]
+hubfetch is cross-platform and can be installed via your favorite package manager, as a standalone binary, or directly from source.
+
+### Recommended
+
+Since `hubfetch` is a Python CLI application, installing it via pipx is highly recommended. This ensures it is installed in an isolated environment and made available globally in your PATH.
+
+```bash
+pipx install hubfetch
+```
+
+### Arch/Manjaro (AUR)
+
+```bash
+yay -S hubfetch
+# or
+paru -S hubfetch
+```
+
+### MacOS & Linux (Homebrew)
+
+```bash
+brew tap pranavu/tap
+brew install hubfetch
+```
+
+### Windows (Pre-built Binary/Scoop)
+
+Please refer to [releases](https://github.com/PranavU-Coder/hubfetch/releases) and download the .exe file you find for hubfetch
+
+> [!IMPORTANT]
+> It is important to install Chafa separately as it is not bundled with the .exe file
+
+If you prefer to use Scoop:
+
+```bash
+scoop bucket add PranavU-Coder https://github.com/PranavU-Coder/scoop-bucket.git
+scoop install hubfetch
+```
+
+> [!NOTE]
+> I personally haven't tested these builds for Windows as I am not really a Windows user, if you face any error please raise an [issue](https://github.com/PranavU-Coder/hubfetch/issues)
+
+### Build From Source
+
+```bash
+git clone https://github.com/PranavU-Coder/hubfetch.git
+cd hubfetch
+```
+
+```bash
+pipx install .
+# or
+uv tool install . 
+```
+
+## Usage
+
+Once installed ensure to authenticate with your PAT:
+
+```bash
+hubfetch auth
+```
+
+authentication process gives you exact steps to generate your PAT incase you didn't make one yet!
+
+once authenticated just run:
+
+```bash
+hubfetch
+```
+
+data is cached for an hour so don't expect immediate change in stats after you push an update to your project :p
 
 ## Tech Stack
 
@@ -74,6 +145,8 @@ Discussed in [discussions](https://github.com/PranavU-Coder/hubfetch/discussions
 All features/bug-fixes being implemented can be visible in the [roadmap](https://github.com/users/PranavU-Coder/projects/11)
 
 A rich [issue-template](https://github.com/PranavU-Coder/hubfetch/issues) to raise all required changes.
+
+I created a [PR](https://github.com/NixOS/nixpkgs/pull/506068) for nixpkgs to include in their vast ecosystem but the maintainers turned it down (rightfully, I'm hurt) but I hope someday when this project matures more, it would be accepted in their ecosystem :3
 
 ## License
 
