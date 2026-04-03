@@ -18,7 +18,7 @@ def _load_json(path: Path) -> dict:
         try:
             with open(path, "r") as f:
                 return json.load(f)
-        except json.JSONDecodeError, OSError:
+        except (json.JSONDecodeError, OSError):  # fmt: skip
             return {}
     return {}
 

@@ -42,7 +42,7 @@ def _read() -> dict:
     try:
         with open(CONFIG_FILE, "r") as f:
             return json.load(f)
-    except OSError, json.JSONDecodeError:
+    except (OSError, json.JSONDecodeError):  # fmt: skip
         _write(_DEFAULTS.copy())
         return _DEFAULTS.copy()
 

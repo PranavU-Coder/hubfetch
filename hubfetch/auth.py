@@ -1,5 +1,8 @@
 import os
 import sys
+import shutil
+import platform
+import subprocess
 import click
 import requests
 from hubfetch import config
@@ -8,7 +11,7 @@ from hubfetch import config
 # terminals known to support the kitty graphics protocol
 _KITTY_TERMS = {
     "TERM": {"xterm-kitty"},
-    "TERM_PROGRAM": {"ghostty", "WezTerm", "Konsole"},
+    "TERM_PROGRAM": {"ghostty", "WezTerm"},
 }
 
 
@@ -43,8 +46,100 @@ def _detect_renderer() -> tuple[str, str]:
     if term_pgm in _KITTY_TERMS["TERM_PROGRAM"]:
         return "kitty", f"detected {term_pgm} (TERM_PROGRAM={term_pgm})"
 
+    if os.environ.get("KONSOLE_VERSION"):
+        return "kitty", "detected Konsole (KONSOLE_VERSION set)"
+
     detected = term_pgm or term or "unknown terminal"
     return "chafa", f"{detected} does not support the kitty graphics protocol"
+
+
+def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
+    """
+    Detect the best available package manager and return
+    (manager_name, install_command_args).
+    Returns None if no supported package manager is found.
+    """
+    system = platform.system()
+
+    if system == "Windows":
+        managers = [
+            ("winget", ["winget", "install", "hpjansson.Chafa"]),
+            ("scoop", ["scoop", "install", "chafa"]),
+        ]
+    elif system == "Darwin":
+        managers = [
+            ("brew", ["brew", "install", "chafa"]),
+        ]
+    else:
+        managers = [
+            ("pacman", ["sudo", "pacman", "-S", "--noconfirm", "chafa"]),
+            ("apt", ["sudo", "apt", "install", "-y", "chafa"]),
+            ("dnf", ["sudo", "dnf", "install", "-y", "chafa"]),
+            ("zypper", ["sudo", "zypper", "install", "-y", "chafa"]),
+            ("brew", ["brew", "install", "chafa"]),
+        ]
+
+    for name, cmd in managers:
+        # for sudo commands, check the actual binary (index 1), not sudo itself
+        binary = cmd[1] if cmd[0] == "sudo" else cmd[0]
+        if shutil.which(binary):
+            return name, cmd
+
+    return None
+
+
+def _ensure_chafa() -> bool:
+    """
+    Check if chafa is available. If not, attempt to install it
+    via the best available package manager.
+    Returns True if chafa is available after the check.
+    """
+    if shutil.which("chafa"):
+        return True
+
+    result = _get_chafa_install_cmd()
+    if not result:
+        click.echo(
+            "⚠ chafa is not installed and no supported package manager was found.\n"
+            "  Please install chafa manually: https://hpjansson.org/chafa/download/",
+            err=True,
+        )
+        return False
+
+    manager, cmd = result
+
+    # warn before running sudo on Linux
+    if cmd[0] == "sudo":
+        click.echo(f"  chafa not found — installing via {manager} (requires sudo)...")
+        if not click.confirm("  This will run a sudo command. Continue?", default=True):
+            click.echo(
+                "  Skipping chafa install. Avatar rendering will be unavailable.\n"
+                "  Install manually: https://hpjansson.org/chafa/download/"
+            )
+            return False
+    else:
+        click.echo(f"  chafa not found — installing via {manager}...")
+
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError:
+        click.echo(
+            f"⚠ Failed to install chafa via {manager}.\n"
+            "  Please install it manually: https://hpjansson.org/chafa/download/",
+            err=True,
+        )
+        return False
+
+    if not shutil.which("chafa"):
+        click.echo(
+            "⚠ chafa was installed but is not on PATH.\n"
+            "  You may need to restart your terminal.",
+            err=True,
+        )
+        return False
+
+    click.echo("  ✓ chafa installed successfully.")
+    return True
 
 
 def _set_renderer(renderer: str) -> None:
@@ -107,10 +202,17 @@ def auth():
 
     click.echo("Display Setup")
     if renderer == "kitty":
-        click.echo(f"✓ Kitty graphics protocol enabled  ({reason})")
+        click.echo(f"  ✓ Kitty graphics protocol enabled  ({reason})")
     else:
-        click.echo(f"✗ Kitty graphics protocol unavailable  ({reason})")
-        click.echo("  Your avatar will be rendered using chafa ascii art.")
+        click.echo(f"  ✗ Kitty graphics protocol unavailable  ({reason})")
+        click.echo("  Falling back to chafa for avatar rendering...")
+        click.echo()
+        if _ensure_chafa():
+            click.echo("  ✓ chafa is ready, your avatar will render as block art.")
+        else:
+            click.echo(
+                "  ✗ Avatar rendering will be unavailable until chafa is installed."
+            )
 
     click.echo()
     click.echo("Run 'hubfetch' to view your GitHub stats.")

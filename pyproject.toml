@@ -1,15 +1,18 @@
 [project]
 name = "hubfetch"
-version = "1.0.0"
+version = "1.0.3"
 description = "A CLI ricing tool designed to fetch GitHub user stats"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "click>=8.3.1",
-    "pytest>=9.0.2",
     "requests>=2.32.5",
     "rich>=14.3.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/PranavU-Coder/hubfetch"
+Repository = "https://github.com/PranavU-Coder/hubfetch"
 
 [project.scripts]
 hubfetch = "hubfetch.cli:cli"
@@ -18,6 +21,10 @@ hubfetch = "hubfetch.cli:cli"
 dev = [
     "hatchling>=1.29.0",
     "ruff>=0.15.8",
+    "build>=1.4.2",
+    "pytest>=9.0.2",
+    "twine>=6.2.0",
+    "pyinstaller>=6.19.0",
 ]
 
 [build-system]

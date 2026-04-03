@@ -27,8 +27,7 @@ Don't worry if your favorite terminal doesn't support kitty's graphics protocol 
 ![Alt](./assets/preview-1.png)
 ![Alt](./assets/preview-2.png)
 ![Alt](./assets/config.png)
-
-https://github.com/user-attachments/assets/9d06be44-fa36-4e24-bdee-a29838a801c3
+![Alt](./assets/first_time.gif)
 
 </details>
 
@@ -44,7 +43,13 @@ https://github.com/user-attachments/assets/9d06be44-fa36-4e24-bdee-a29838a801c3
     * **Stats Cache:** Keeps your GitHub data fresh with a 1-hour expiration to minimize API calls and maximizes speed.
 * **Dynamic Customization**: Fully configurable via `~/.config/hubfetch/config.json` as discussed earlier. Toggle individual fields, adjust image dimensions, or customize the entire color palette with bold and italic Rich styles.
 * **Secure Authentication**: Dedicated `auth` command to securely handle GitHub Personal Access Tokens (PAT) and verify credentials before setup.
-* **Modern CLI Experience** – Built with `Click` for a seamless command-line interface and `Rich` for beautiful, side-by-side terminal layouts.
+* **Modern CLI Experience**: Built with `Click` for a seamless command-line interface and `Rich` for beautiful, side-by-side terminal layouts.
+
+## Dependencies
+
+**[Chafa](https://hpjansson.org/chafa/)** (Highly Recommended): Used as the primary fallback for terminals that do not support the Kitty graphics protocol. It converts your GitHub avatar into high-quality ANSI symbols/block art.
+
+While the script does attempt to install in case terminal emulator appears to not support Kitty's graphics protocol, it is highly recommended to install manually in the event that chafa installation fails.
 
 ## Installation
 
@@ -64,11 +69,11 @@ https://github.com/user-attachments/assets/9d06be44-fa36-4e24-bdee-a29838a801c3
 
 ## Future
 
-Discussed in [[placeholder text till I make it public]]
+Discussed in [discussions](https://github.com/PranavU-Coder/hubfetch/discussions)
 
 All features/bug-fixes being implemented can be visible in the [roadmap](https://github.com/users/PranavU-Coder/projects/11)
 
-A rich issue-template to raise all required changes.
+A rich [issue-template](https://github.com/PranavU-Coder/hubfetch/issues) to raise all required changes.
 
 ## License
 
@@ -76,10 +81,10 @@ A rich issue-template to raise all required changes.
 
 ## Other
 
-<a href="https://star-history.com/#PranavU-Coder/hubfetch&Date">
+<a href="https://www.star-history.com/?repos=PranavU-Coder%2Fhubfetch&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=PranavU-Coder/hubfetch&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=PranavU-Coder/hubfetch&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=PranavU-Coder/hubfetch&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=PranavU-Coder/hubfetch&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=PranavU-Coder/hubfetch&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=PranavU-Coder/hubfetch&type=date&legend=top-left" />
  </picture>
 </a>
