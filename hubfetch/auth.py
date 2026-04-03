@@ -49,7 +49,8 @@ def _detect_renderer() -> tuple[str, str]:
     detected = term_pgm or term or "unknown terminal"
     return "chafa", f"{detected} does not support the kitty graphics protocol"
 
-# all the stuff I do to ensure things are cross-platform 
+
+# all the stuff I do to ensure things are cross-platform
 def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     """
     Detect the best available package manager and return
@@ -61,8 +62,8 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     if system == "Windows":
         managers = [
             ("winget", ["winget", "install", "hpjansson.Chafa"]),
-            ("scoop",  ["scoop", "install", "chafa"]),
-            ("choco",  ["choco", "install", "chafa", "-y"]),
+            ("scoop", ["scoop", "install", "chafa"]),
+            ("choco", ["choco", "install", "chafa", "-y"]),
         ]
     elif system == "Darwin":
         managers = [
@@ -71,10 +72,10 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     else:
         managers = [
             ("pacman", ["sudo", "pacman", "-S", "--noconfirm", "chafa"]),
-            ("apt",    ["sudo", "apt", "install", "-y", "chafa"]),
-            ("dnf",    ["sudo", "dnf", "install", "-y", "chafa"]),
+            ("apt", ["sudo", "apt", "install", "-y", "chafa"]),
+            ("dnf", ["sudo", "dnf", "install", "-y", "chafa"]),
             ("zypper", ["sudo", "zypper", "install", "-y", "chafa"]),
-            ("brew",   ["brew", "install", "chafa"]),  
+            ("brew", ["brew", "install", "chafa"]),
         ]
 
     for name, cmd in managers:
@@ -206,9 +207,11 @@ def auth():
         click.echo("  Falling back to chafa for avatar rendering...")
         click.echo()
         if _ensure_chafa():
-            click.echo("  ✓ chafa is ready — your avatar will render as block art.")
+            click.echo("  ✓ chafa is ready, your avatar will render as block art.")
         else:
-            click.echo("  ✗ Avatar rendering will be unavailable until chafa is installed.")
+            click.echo(
+                "  ✗ Avatar rendering will be unavailable until chafa is installed."
+            )
 
     click.echo()
     click.echo("Run 'hubfetch' to view your GitHub stats.")

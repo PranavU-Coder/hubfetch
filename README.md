@@ -43,7 +43,7 @@ Don't worry if your favorite terminal doesn't support kitty's graphics protocol 
     * **Stats Cache:** Keeps your GitHub data fresh with a 1-hour expiration to minimize API calls and maximizes speed.
 * **Dynamic Customization**: Fully configurable via `~/.config/hubfetch/config.json` as discussed earlier. Toggle individual fields, adjust image dimensions, or customize the entire color palette with bold and italic Rich styles.
 * **Secure Authentication**: Dedicated `auth` command to securely handle GitHub Personal Access Tokens (PAT) and verify credentials before setup.
-* **Modern CLI Experience** – Built with `Click` for a seamless command-line interface and `Rich` for beautiful, side-by-side terminal layouts.
+* **Modern CLI Experience**: Built with `Click` for a seamless command-line interface and `Rich` for beautiful, side-by-side terminal layouts.
 
 ## Dependencies
 
