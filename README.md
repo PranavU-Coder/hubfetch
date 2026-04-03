@@ -6,7 +6,7 @@
 
 A [not very minimal] fetching tool for your GitHub profile. Flex on your friends from terminal itself without even opening a new tab.
 
-This entire script is written purely in python and uses GitHub's REST API for acquiring details of your profile, you can opt out of certain fields and even change the image rendered in accordance to your needs by editing at ~/.config/hubfetch/config.json
+This entire script is written purely in python and uses GitHub's REST API for acquiring details of your profile, you can opt out of certain fields and even change the image rendered in accordance to your needs by editing at `~/.config/hubfetch/config.json`
 
 The image rendered depends heavily on the terminal as it requires kitty's graphics protocol and full image rendering is supported in those terminals which are capable enough of supporting it.
 
