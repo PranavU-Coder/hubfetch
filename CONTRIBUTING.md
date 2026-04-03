@@ -4,7 +4,7 @@ Thanks for even considering to contribute to hubfetch!
 
 ## Dev Setup
 
-- Python 3.10+ [Ideally better if you have 3.14 interpreter]
+- Python 3.14+
 - A GitHub Personal Access Token (needed to actually run the tool during development)
 - [chafa](https://hpjansson.org/chafa/) installed for testing image rendering fallback
 

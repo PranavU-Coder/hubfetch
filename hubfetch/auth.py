@@ -11,7 +11,7 @@ from hubfetch import config
 # terminals known to support the kitty graphics protocol
 _KITTY_TERMS = {
     "TERM": {"xterm-kitty"},
-    "TERM_PROGRAM": {"ghostty", "WezTerm", "Konsole"},
+    "TERM_PROGRAM": {"ghostty", "WezTerm"},
 }
 
 
@@ -46,11 +46,13 @@ def _detect_renderer() -> tuple[str, str]:
     if term_pgm in _KITTY_TERMS["TERM_PROGRAM"]:
         return "kitty", f"detected {term_pgm} (TERM_PROGRAM={term_pgm})"
 
+    if os.environ.get("KONSOLE_VERSION"):
+        return "kitty", "detected Konsole (KONSOLE_VERSION set)"
+
     detected = term_pgm or term or "unknown terminal"
     return "chafa", f"{detected} does not support the kitty graphics protocol"
 
 
-# all the stuff I do to ensure things are cross-platform
 def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     """
     Detect the best available package manager and return
@@ -62,8 +64,8 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     if system == "Windows":
         managers = [
             ("winget", ["winget", "install", "hpjansson.Chafa"]),
-            ("scoop", ["scoop", "install", "chafa"]),
-            ("choco", ["choco", "install", "chafa", "-y"]),
+            ("scoop",  ["scoop", "install", "chafa"]),
+            ("choco",  ["choco", "install", "chafa", "-y"]),
         ]
     elif system == "Darwin":
         managers = [
@@ -72,10 +74,10 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     else:
         managers = [
             ("pacman", ["sudo", "pacman", "-S", "--noconfirm", "chafa"]),
-            ("apt", ["sudo", "apt", "install", "-y", "chafa"]),
-            ("dnf", ["sudo", "dnf", "install", "-y", "chafa"]),
+            ("apt",    ["sudo", "apt", "install", "-y", "chafa"]),
+            ("dnf",    ["sudo", "dnf", "install", "-y", "chafa"]),
             ("zypper", ["sudo", "zypper", "install", "-y", "chafa"]),
-            ("brew", ["brew", "install", "chafa"]),
+            ("brew",   ["brew", "install", "chafa"]),  
         ]
 
     for name, cmd in managers:

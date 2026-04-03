@@ -4,11 +4,11 @@ from hubfetch import config
 from hubfetch.auth import auth
 from hubfetch.api import GitHubClient
 from hubfetch.display import render
-
+from importlib.metadata import version
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-@click.version_option(version="1.0.0")
+@click.version_option(version=version("hubfetch"))
 def cli(ctx):
     """neofetch-style CLI for your GitHub profile."""
 

@@ -1,6 +1,7 @@
 import re
 import requests
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 
 class GitHubClient:
@@ -93,8 +94,17 @@ class GitHubClient:
             "from": f"{year}-01-01T00:00:00Z",
             "to": f"{year}-12-31T23:59:59Z",
         }
+
         data = self._graphql(query, variables)
-        collection = data["data"]["user"]["contributionsCollection"]
+        if "errors" in data:
+            raise RuntimeError(f"GraphQL error: {data['errors']}")
+        user_data = data.get("data", {}).get("user")
+        if not user_data:
+            raise RuntimeError(
+                "Could not fetch contribution data. Check your token scopes."
+            )
+
+        collection = user_data["contributionsCollection"]
         calendar = collection["contributionCalendar"]
 
         days = [
@@ -107,21 +117,22 @@ class GitHubClient:
             key=lambda d: d["contributionCount"],
             default={"date": "None", "contributionCount": 0},
         )
-        best_count = best["contributionCount"]
 
         return {
             "commits": collection.get("totalCommitContributions", 0),
             "issues": collection.get("totalIssueContributions", 0),
             "prs": collection.get("totalPullRequestContributions", 0),
-            "best_day": f"{best_count}",
+            "best_day": f"{best['contributionCount']}",
         }
 
-    def fetch_stats(self, year: int = 2026) -> dict:
-        from hubfetch.cache import ensure_avatar, get_cached_stats, save_stats
+    def fetch_stats(self, year: int | None = None) -> dict:
+        from hubfetch.cache import ensure_avatar, get_cached_stats, save_stats  # A masterpiece of a local import by Sir Pranav
+
+        year = year or datetime.now().year
 
         cached = get_cached_stats()
         if cached:
-            ensure_avatar(cached["user"], "")
+            ensure_avatar(cached["user"], cached.get("avatar_url", ""))
             return cached
 
         user = self.get_user()
@@ -163,6 +174,7 @@ class GitHubClient:
             "prs": contribs.get("prs", 0),
             "best_day": contribs.get("best_day"),
             "top_language": top_language,
+            "avatar_url": avatar_url,
         }
 
         save_stats(stats)

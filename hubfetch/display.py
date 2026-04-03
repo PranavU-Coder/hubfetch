@@ -45,6 +45,10 @@ class ImageRenderer:
         if self.renderer == "none":
             return None
 
+        if not shutil.which("chafa"):
+            from hubfetch.auth import _ensure_chafa
+            _ensure_chafa()
+
         if shutil.which("chafa"):
             result = self._render_with_chafa(image_path)
             if result:
@@ -243,6 +247,7 @@ def _print_kitty_side_by_side(
 
 
 def render(data: dict) -> None:
+    from hubfetch.auth import _detect_renderer
     from hubfetch.cache import avatar_path
     from hubfetch.config import get_config
 
@@ -260,7 +265,12 @@ def render(data: dict) -> None:
         console.print(_build_info_table(data, cfg))
         return
 
-    if renderer.renderer == "kitty" and path.exists():
+    # resolve "auto" to the detected renderer at runtime
+    effective_renderer = renderer.renderer
+    if effective_renderer == "auto":
+        effective_renderer, _ = _detect_renderer()
+
+    if effective_renderer == "kitty" and path.exists():
         if _print_kitty_side_by_side(str(path), _build_info_lines(data, cfg), renderer):
             return
         # kitty failed => fall through to chafa
