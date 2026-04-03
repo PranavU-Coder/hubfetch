@@ -6,6 +6,7 @@ from hubfetch.api import GitHubClient
 from hubfetch.display import render
 from importlib.metadata import version
 
+
 @click.group(invoke_without_command=True)
 @click.pass_context
 @click.version_option(version=version("hubfetch"))

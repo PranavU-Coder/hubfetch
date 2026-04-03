@@ -64,8 +64,8 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     if system == "Windows":
         managers = [
             ("winget", ["winget", "install", "hpjansson.Chafa"]),
-            ("scoop",  ["scoop", "install", "chafa"]),
-            ("choco",  ["choco", "install", "chafa", "-y"]),
+            ("scoop", ["scoop", "install", "chafa"]),
+            ("choco", ["choco", "install", "chafa", "-y"]),
         ]
     elif system == "Darwin":
         managers = [
@@ -74,10 +74,10 @@ def _get_chafa_install_cmd() -> tuple[str, list[str]] | None:
     else:
         managers = [
             ("pacman", ["sudo", "pacman", "-S", "--noconfirm", "chafa"]),
-            ("apt",    ["sudo", "apt", "install", "-y", "chafa"]),
-            ("dnf",    ["sudo", "dnf", "install", "-y", "chafa"]),
+            ("apt", ["sudo", "apt", "install", "-y", "chafa"]),
+            ("dnf", ["sudo", "dnf", "install", "-y", "chafa"]),
             ("zypper", ["sudo", "zypper", "install", "-y", "chafa"]),
-            ("brew",   ["brew", "install", "chafa"]),  
+            ("brew", ["brew", "install", "chafa"]),
         ]
 
     for name, cmd in managers:

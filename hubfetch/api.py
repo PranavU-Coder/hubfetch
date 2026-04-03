@@ -126,7 +126,11 @@ class GitHubClient:
         }
 
     def fetch_stats(self, year: int | None = None) -> dict:
-        from hubfetch.cache import ensure_avatar, get_cached_stats, save_stats  # A masterpiece of a local import by Sir Pranav
+        from hubfetch.cache import (
+            ensure_avatar,
+            get_cached_stats,
+            save_stats,
+        )  # A masterpiece of a local import by Sir Pranav
 
         year = year or datetime.now().year
 

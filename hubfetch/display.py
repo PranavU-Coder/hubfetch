@@ -47,6 +47,7 @@ class ImageRenderer:
 
         if not shutil.which("chafa"):
             from hubfetch.auth import _ensure_chafa
+
             _ensure_chafa()
 
         if shutil.which("chafa"):
